@@ -4,7 +4,11 @@
 #                                                                                                  #
 ####################################################################################################
 
-#https://realpython.com/how-to-make-a-discord-bot-python/ - website with basic tutorial
+#Helpful sources:
+# 1 - https://realpython.com/how-to-make-a-discord-bot-python/                              - website with basic tutorial
+# 2 - https://www.youtube.com/watch?v=5yahh4tR0L0&list=PLW3GfRiBCHOiEkjvQj0uaUB1Q-RckYnj9   - tutorial series on building a discord bot
+
+#--------------------------------------------------------------------------------------------------#
 
 import os
 import random
@@ -16,18 +20,24 @@ from dotenv import load_dotenv
 #Load variables from .env file
 load_dotenv()
 
+#Get token from .env file. Token is from the bot (see Discord develop)
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 prefixCommand = 'bot.'
 
+#Create client
 client = commands.Bot(command_prefix=prefixCommand)
+
+#Remove command 'help' to be able to implement own 'help' command
 client.remove_command('help')
 
+#Event called when the discord bot is ready
 @client.event
 async def on_ready():
     await client.change_presence(activity=discord.Game(name='Coffin meme'))
     print(f'{client.user} is connected')
 
+#Event for when a user sends a message through a channel
 @client.event
 async def on_message(message):
 
@@ -51,14 +61,16 @@ async def on_message(message):
         
     elif message.content.lower() == 'victor':
         await message.channel.send('RIP')
+
     #If no phrase is present, check for commands
     else:
         await client.process_commands(message)
 
-# help: Command
+# help: Command which gives an explanation 
 @client.command()
 async def help(ctx):
 
+    #Dictionary - Key = command call, Value = explanation of command
     commandDict = {
         'noPlay A B' : 'Let player \'A\' know not to play \'B\'',
         'neverGiveUp' : 'Let others know you will never give up on them',
@@ -67,11 +79,13 @@ async def help(ctx):
         'sendHugs A' : 'Give another user a hug'
     }
 
+    #Initialize embed, which makes a nice looking window
     embedHelp = discord.Embed(
         title = 'Help - PRPD bot',
         description = 'A guide to all the commands',
         colour = discord.Colour.green()
     )
+
 
     count = 0
 
