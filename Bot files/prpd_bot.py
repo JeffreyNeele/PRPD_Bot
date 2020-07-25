@@ -7,6 +7,9 @@
 #Helpful sources:
 # 1 - https://realpython.com/how-to-make-a-discord-bot-python/                              - website with basic tutorial
 # 2 - https://www.youtube.com/watch?v=5yahh4tR0L0&list=PLW3GfRiBCHOiEkjvQj0uaUB1Q-RckYnj9   - tutorial series on building a discord bot
+# 3 - https://towardsdatascience.com/how-to-use-riot-api-with-python-b93be82dbbd6           - short tutorial about riotAPI
+# 4 - https://github.com/pseudonym117/Riot-Watcher                                          - riotwatcher github link
+# 5 - https://riot-watcher.readthedocs.io/en/latest/                                        - riotwatcher documentation page
 
 #--------------------------------------------------------------------------------------------------#
 
@@ -16,12 +19,14 @@ import random
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+from riotAPI import RiotObj
 
 #Load variables from .env file
 load_dotenv()
 
 #Get token from .env file. Token is from the bot (see Discord develop)
 TOKEN = os.getenv('DISCORD_TOKEN')
+key_API = os.getenv('RIOT_KEY')
 
 prefixCommand = 'bot.'
 
@@ -31,10 +36,14 @@ client = commands.Bot(command_prefix=prefixCommand)
 #Remove command 'help' to be able to implement own 'help' command
 client.remove_command('help')
 
+#Create riotAPI object
+riot_API = RiotObj(keyAPI=key_API)
+
+
 #Event called when the discord bot is ready
 @client.event
 async def on_ready():
-    await client.change_presence(activity=discord.Game(name='Coffin meme'))
+    await client.change_presence(activity=discord.Game(name='Lillia\'s Harem'))
     print(f'{client.user} is connected')
 
 #Event for when a user sends a message through a channel
@@ -72,6 +81,7 @@ async def help(ctx):
 
     #Dictionary - Key = command call, Value = explanation of command
     commandDict = {
+        'leagueStatus' : 'Shows the status of the EUW LOL server',
         'noPlay A B' : 'Let player \'A\' know not to play \'B\'',
         'neverGiveUp' : 'Let others know you will never give up on them',
         'selectRoles' : 'Randomly assign roles to original 5 people',
@@ -96,6 +106,24 @@ async def help(ctx):
         count += 1
 
     await ctx.send(embed=embedHelp)
+
+@client.command()
+async def leagueStatus(ctx):
+    status = riot_API.getLolStatus()
+
+    #Initialize embed, which makes a nice looking window
+    embedStatus = discord.Embed(
+        title = 'Status LoL services',
+        description = 'Shows LoL service status',
+        colour = discord.Colour.blue()
+    )
+
+    for services in status:
+        nameField = services['name']
+        serviceStatus = services['status']
+        embedStatus.add_field(name=nameField, value=serviceStatus, inline=False)
+
+    await ctx.send(embed=embedStatus)
 
 # neverGiveUp: Command to remind people to not give up
 @client.command()
@@ -162,5 +190,29 @@ async def sendHugs(ctx, *args):
         output = author + ' gives warm hugs to ' + target
 
     await ctx.send(output)
+
+#SECTION FOR TODO CODE!
+#--------------------------------------------------------------------------------------------------#
+
+#Command to test new commands before making it an official command
+@client.command()
+async def comTest(ctx):
+    pass
+        
+
+#TODO: Command which shows basic information of a summoner
+@client.command()
+async def liveMatch(ctx, name):
+
+    summoner = riot_API.getSummoner(name)
+    encryptSummonerID = summoner['id']
+
+    liveMatchInfo = riot_API.getLiveMatch(encryptSummonerID)
+
+    print(liveMatchInfo)
+
+    await ctx.send('Command successful')
+
+#--------------------------------------------------------------------------------------------------#
 
 client.run(TOKEN)

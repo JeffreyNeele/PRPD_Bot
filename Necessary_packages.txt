@@ -1,0 +1,3 @@
+Necessary packages that need to be installed:
+1) discord.py
+2) riotwatcher
