@@ -57,9 +57,28 @@ class RiotObj:
         status = self.lol_watcher.lol_status.shard_data(self.region)['services']
         return status
     
+    def getMap(self, mapId):
+
+        if mapId == 11:
+            return 'Summoner\'s Rift'
+        elif mapId == 12:
+            return 'Howling Abyss'
+        elif mapId == 21:
+            return 'Nexus Blitz'
+        else:
+            return ''
+
     #Method which obtains summoner information from Riot Games by using riotAPI. Returns a dictionary
     def getSummoner(self, name):
 
         summoner = self.lol_watcher.summoner.by_name(self.region, name)
 
         return summoner
+
+    def getTotalChampionMastery(self, summonerID):
+
+        mastery = self.lol_watcher.champion_mastery.scores_by_summoner(self.region, summonerID)
+        
+        return str(mastery)
+
+
