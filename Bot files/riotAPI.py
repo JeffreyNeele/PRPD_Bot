@@ -75,6 +75,12 @@ class RiotObj:
 
         return summoner
 
+    def getSummonerRankInfo(self, summonerID):
+
+        rankInfo = self.lol_watcher.league.by_summoner(self.region, summonerID)
+
+        return rankInfo
+
     def getTotalChampionMastery(self, summonerID):
 
         mastery = self.lol_watcher.champion_mastery.scores_by_summoner(self.region, summonerID)

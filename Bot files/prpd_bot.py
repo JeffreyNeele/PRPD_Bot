@@ -88,7 +88,8 @@ async def help(ctx):
         'selectRoles' : 'Randomly assign roles to original 5 people',
         'selectRoles A B C D E' : 'Randomly assign roles to players A B C D E (max 5 players)',
         'sendHugs A' : 'Give another user a hug',
-        'shouldDo A' : 'Almighty bot will tell you if you should do A'
+        'shouldMe A' : 'Almighty bot will tell you if you should do A',
+        'shouldOther A B' : 'Almighty bot will tell if user A should do B'
     }
 
     #Initialize embed, which makes a nice looking window
@@ -153,6 +154,20 @@ async def lolSummoner(ctx, *args):
         #Add champion mastery level
         masteryLevel = riot_API.getTotalChampionMastery(summoner['id'])
         embedSummoner.add_field(name='Champion mastery', value=masteryLevel, inline=True)
+
+        outputRank = 'Unranked'
+        rankInfo = riot_API.getSummonerRankInfo(summoner['id'])
+
+        #Add summoner rank - only obtain the rank for 'RANKED_SOLO_5x5'
+        for rankInformation in rankInfo:
+            if rankInformation['queueType'] == 'RANKED_SOLO_5x5':
+                rankTier = rankInformation['tier']
+                rankDivision = rankInformation['rank']
+                rankPoints = rankInformation['leaguePoints']
+                outputRank = rankTier + ' ' + rankDivision + '\n' + str(rankPoints) + ' LP'
+        
+        embedSummoner.add_field(name='Rank solo', value=outputRank, inline=True)
+
 
         #Add if summoner is in-game right now
         try:
@@ -244,7 +259,7 @@ async def sendHugs(ctx, *args):
     await ctx.send(output)
 
 @client.command()
-async def shouldDo(ctx, *args):
+async def shouldMe(ctx, *args):
 
     chance = random.randint(0, 100)
     output = ''
@@ -259,6 +274,24 @@ async def shouldDo(ctx, *args):
         target += ' ' + args[i]
     
     await ctx.send(output + target)
+
+@client.command()
+async def shouldOther(ctx, user, *args):
+
+    chance = random.randint(0, 100)
+    output = ''
+
+    if chance <= 49:
+        output = user + ' should not do '
+    else:
+        output = 'It is save for ' + user + ' to do '
+    
+    target = args[0]
+    for i in range(1,len(args),1):
+        target += ' ' + args[i]
+    
+    await ctx.send(output + target)
+
 
 
 #SECTION FOR TODO CODE!
