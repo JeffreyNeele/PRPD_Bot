@@ -54,21 +54,23 @@ async def on_message(message):
     if message.author == client.user:
         return
 
+    lowerMessage = message.content.lower()
+
     #Send a message in the channel as an answer to certain phrases
-    if message.content.lower() == 'jason':
+    if lowerMessage == 'jason':
         await message.channel.send('Derulo')
 
-    elif message.content.lower() == 'jeffrey' or message.content.lower() == 'jeff':
+    elif lowerMessage == 'jeffrey' or lowerMessage == 'jeff' or lowerMessage == 'geoff':
         await message.channel.send('My name is Jeff')
         await message.channel.send(file=discord.File('Images/my_name_jeff.jpg'))
 
-    elif message.content.lower() == 'michiel':
+    elif lowerMessage == 'michiel':
         await message.channel.send('de Ruyter')
 
-    elif message.content.lower() == 'jelmer':
+    elif lowerMessage == 'jelmer':
         await message.channel.send('Bedoel je niet Jelke?')
         
-    elif message.content.lower() == 'victor':
+    elif lowerMessage == 'victor':
         await message.channel.send('RIP')
 
     #If no phrase is present, check for commands
