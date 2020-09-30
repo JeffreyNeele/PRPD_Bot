@@ -19,6 +19,7 @@ import random
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+from pathlib import Path
 from riotAPI import RiotObj
 
 #Load variables from .env file
@@ -38,6 +39,12 @@ client.remove_command('help')
 
 #Create riotAPI object
 riot_API = RiotObj(keyAPI=key_API)
+
+#Variables for bot commands
+championTileImagePath = 'dragontail-10.19.1/10.19.1/img/champion/'
+profileiconPath = "dragontail-10.19.1/10.19.1/img/profileicon/"
+mapIconPath = "dragontail-10.19.1/10.19.1/img/map/"
+whitespace = '\u200b'
 
 
 #Event called when the discord bot is ready
@@ -83,6 +90,7 @@ async def help(ctx):
 
     #Dictionary - Key = command call, Value = explanation of command
     commandDict = {
+        'liveMatch A' : 'Shows general match information for summoner A on EUW',
         'lolStatus' : 'Shows the status of the EUW LOL server',
         'lolSummoner A' : 'Show information about summoner A on EUW',
         'noPlay A B' : 'Let player \'A\' know not to play \'B\'',
@@ -181,13 +189,11 @@ async def lolSummoner(ctx, *args):
             mapID = liveMatchInfo['mapId']
             gameMap = riot_API.getMap(mapID)
             gameType = liveMatchInfo['gameType']
-            embedSummoner.add_field(name='In-game', value='Yes\n' + mode + ' - ' + gameMap + '\n' + gameType, inline=False)
-
-        
+            embedSummoner.add_field(name='In-game', value='Yes\n' + mode + ' - ' + gameMap + '\n' + gameType, inline=False)       
 
         #Add profile image to the embed
-        nameOfFile = str(summoner['profileIconId']) + '.png'
-        path = 'dragontail-10.15.1/10.15.1/img/profileicon/' + nameOfFile
+        nameOfFile = str(summoner['profileIconId']) + ".png"
+        path = Path(profileiconPath) / nameOfFile
 
         file = discord.File(path, filename=nameOfFile)
         embedSummoner.set_thumbnail(url='attachment://' + nameOfFile)
@@ -302,7 +308,17 @@ async def shouldOther(ctx, user, *args):
 #Command to test new commands before making it an official command
 @client.command()
 async def comTest(ctx):
-    pass
+    
+    allSummonerSpells = riot_API.getSummonerSpells()
+    print(allSummonerSpells)
+
+#TODO: Command which shows basic information of a summoner in a match
+@client.command()
+async def championInfo(ctx, *args):
+    
+    target = args[0]
+    for i in range(1,len(args),1):
+        target += ' ' + args[i]
 
 #TODO: Command which shows basic information of a summoner in a match
 @client.command()
@@ -312,21 +328,186 @@ async def liveMatch(ctx, *args):
     for i in range(1,len(args),1):
         target += ' ' + args[i]
 
+    #First see if summoner exists
     try:
         summoner = riot_API.getSummoner(target)
     except:
         await ctx.send('Summoner name does not exist. Please try again')
     else:
+
+        #Get encryptedID of summoner to get liveMatch information
         encryptSummonerID = summoner['id']
 
+        #If summoner exists, get liveMatch info if summoner is in a LoL game
         try:
+            #Get information of live match
             liveMatchInfo = riot_API.getLiveMatch(encryptSummonerID)
+
+            #Get information of all champions
+            allChampions = riot_API.getAllChampions()
+
+            #Get summonerspells
+            allSummonerSpells = riot_API.getSummonerSpells()
+
+
         except:
             await ctx.send(target + ' is not in a game now')
         else:
-            print(liveMatchInfo)
 
-    await ctx.send('Command successful')
+            #Team Blue variables
+            teamBlueName = []
+            teamBlueChampion = []
+
+            #Team Red variables
+            teamRedName = []
+            teamRedChampion = []
+
+            #Target summoner extra information
+            targetRuneStyles = []
+            targetRunes = []
+            targetChampion = ''
+            targetSummonerSpells = ''
+
+            #Iterate through all participants
+            for summoner in liveMatchInfo['participants']:
+
+                #First set general information
+                name = summoner['summonerName']
+
+                #Secondly retrieve the champion of the current player
+                championID = str(summoner['championId'])
+                currentChampion = ''
+
+                for champion in allChampions:
+                    if allChampions[champion]['key'] == championID:
+                        currentChampion = allChampions[champion]['id']                    
+                        break
+
+                #check if current player is target player
+                if name == target:
+                    #Retrieve champion
+                    targetChampion = currentChampion
+
+                    #Retrieve summoner spells
+                    spell1 = str(summoner['spell1Id'])
+                    spell2 = str(summoner['spell2Id'])
+
+                    for spells in allSummonerSpells:
+                        if allSummonerSpells[spells]['key'] == spell1:
+                            targetSummonerSpells = allSummonerSpells[spells]['name']
+                    
+                    for spells in allSummonerSpells:
+                        if allSummonerSpells[spells]['key'] == spell2:
+                            targetSummonerSpells += '\n' + allSummonerSpells[spells]['name']
+
+
+                    #Retrieve rune styles
+                    targetRuneStyles.append(summoner['perks']['perkStyle'])
+                    targetRuneStyles.append(summoner['perks']['perkSubStyle'])
+
+                    #RunesReforged from target Summoner
+                    currentRunes = summoner['perks']['perkIds']
+
+                    #Retrieve runes from main style
+                    mainStyle = riot_API.getRuneStyle(targetRuneStyles[0])
+
+                    for i in range(0,4,1):
+                        matchRuneID = currentRunes[i]
+                        targetRunes.append(riot_API.getRuneTarget(matchRuneID, mainStyle))
+
+                    #Retrieve runes from substyle
+                    subStyle = riot_API.getRuneStyle(targetRuneStyles[1])
+
+                    for i in range(4,6,1):
+                        matchRuneID = currentRunes[i]
+                        targetRunes.append(riot_API.getRuneTarget(matchRuneID, subStyle))
+
+                #Finally, add the current player to their team
+                if summoner['teamId'] == 100:
+                    teamBlueName.append(name)
+                    teamBlueChampion.append(currentChampion)
+                else:
+                    teamRedName.append(name)
+                    teamRedChampion.append(currentChampion)
+
+            #Make embed to showcase summoner
+            embedMatch = discord.Embed(
+                colour = discord.Colour.blurple()
+            )
+
+            #List of files to send with message, mostly used for images
+            files = []
+
+            
+            #Add profile image to the embed
+            nameOfFile = 'map' + str(liveMatchInfo['mapId']) + ".png"
+            path = Path(mapIconPath) / nameOfFile
+
+            #Add match mode
+            mode = liveMatchInfo['gameMode']
+            embedMatch.add_field(name='Match Type', value=mode, inline=False)
+
+            #Add map as thumbnail
+            thumbnailFile = discord.File(path, filename=nameOfFile)
+            files.append(thumbnailFile)
+            embedMatch.set_thumbnail(url='attachment://' + nameOfFile)
+
+            #Display info Blue Team
+            #Summoners
+            valueTeamBlue = ''
+            for member in teamBlueName:
+                valueTeamBlue += member + '\n'
+            embedMatch.add_field(name='Team Blue', value=valueTeamBlue, inline=True)
+
+            #Champions
+            valueTeamBlue = ''
+            for champion in teamBlueChampion:
+                valueTeamBlue += champion + '\n'
+            embedMatch.add_field(name='Champions', value=valueTeamBlue, inline=True)
+
+            #Add whitespace
+            embedMatch.add_field(name=whitespace, value=whitespace, inline=False)
+
+            #Display info Red Team
+            #Summoners
+            valueTeamRed = ''
+            for member in teamRedName:
+                valueTeamRed += member + '\n'
+            embedMatch.add_field(name='Team Red', value=valueTeamRed, inline=True)
+
+            #Champions
+            valueTeamRed = ''
+            for champion in teamRedChampion:
+                valueTeamRed += champion + '\n'
+            embedMatch.add_field(name='Champions', value=valueTeamRed, inline=True)
+            
+            #Add whitespace
+            embedMatch.add_field(name=whitespace, value=whitespace, inline=False)
+
+            #Display information of the target
+            #Main Runes
+            mainRunes = targetRunes[0]['name']
+            for i in range(1,4,1):
+                mainRunes += '\n' + targetRunes[i]['name']
+
+            embedMatch.add_field(name='Main: ' + mainStyle['name'], value=mainRunes, inline=True)
+
+            #Sub Runes
+            subRunes = targetRunes[4]['name'] + '\n' + targetRunes[5]['name']
+            embedMatch.add_field(name='Sub: ' + subStyle['name'], value=subRunes, inline=True)
+
+            #Summoner spells
+            embedMatch.add_field(name='Summoner Spells', value=targetSummonerSpells, inline=True)
+
+            #Add current champion picture
+            championURL = allChampions[targetChampion]['image']['full']            
+            path = Path(championTileImagePath) / championURL
+
+            championFile = discord.File(path, filename=championURL)
+            files.append(championFile)
+            embedMatch.set_author(name=target + ' Match', icon_url='attachment://' + championURL)
+            
+            await ctx.send(files=files, embed=embedMatch)
 
 #--------------------------------------------------------------------------------------------------#
 

@@ -33,9 +33,7 @@ class RiotObj:
         champions_version = self.getLatestVersion()
         current_champ_list = self.lol_watcher.data_dragon.champions(champions_version)
         
-        dataList = current_champ_list['data']['Aatrox']
-        
-        print(dataList)
+        return current_champ_list['data']
 
     #Method which obtains the latest version of LoL
     def getLatestVersion(self):
@@ -57,6 +55,7 @@ class RiotObj:
         status = self.lol_watcher.lol_status.shard_data(self.region)['services']
         return status
     
+    #Method which converts mapID to map name
     def getMap(self, mapId):
 
         if mapId == 11:
@@ -67,6 +66,32 @@ class RiotObj:
             return 'Nexus Blitz'
         else:
             return ''
+    
+    #Method which retrieves all the runesReforged from Riot Games by using riotAPI
+    def getAllRunes(self):
+
+        version = self.getLatestVersion()
+        runesReforged = self.lol_watcher.data_dragon.runes_reforged(version)
+        
+        return runesReforged
+
+    #Method which returns the target runeStyle
+    def getRuneStyle(self, styleID):
+
+        allRunes = self.getAllRunes()
+
+        for rune in allRunes:
+            if rune['id'] == styleID:
+                return rune
+
+    #Method which returns the target rune from the target runeStyle
+    def getRuneTarget(self, runeID, runeStyle):
+
+        for runeList in runeStyle['slots']:
+            for rune in runeList['runes']:
+                if rune['id'] == runeID:
+                    return rune
+
 
     #Method which obtains summoner information from Riot Games by using riotAPI. Returns a dictionary
     def getSummoner(self, name):
@@ -75,12 +100,22 @@ class RiotObj:
 
         return summoner
 
+    #Method obtains all ranked information for a summoner
     def getSummonerRankInfo(self, summonerID):
 
         rankInfo = self.lol_watcher.league.by_summoner(self.region, summonerID)
 
         return rankInfo
 
+    #Method obtains all summoner spell information
+    def getSummonerSpells(self):
+
+        version = self.getLatestVersion()
+        allSummonerSpells = self.lol_watcher.data_dragon.summoner_spells(version)
+
+        return allSummonerSpells['data']
+
+    #Method obtains total mastery points from Riot Games by using riotAPI
     def getTotalChampionMastery(self, summonerID):
 
         mastery = self.lol_watcher.champion_mastery.scores_by_summoner(self.region, summonerID)
