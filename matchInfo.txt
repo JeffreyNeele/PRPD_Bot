@@ -1,0 +1,35 @@
+{
+'gameId': 4831808372, 
+'mapId': 11, 
+'gameMode': 'CLASSIC', 
+'gameType': 'MATCHED_GAME', 
+'gameQueueConfigId': 420, 
+'participants': 
+[
+{'teamId': 100, 'spell1Id': 12, 'spell2Id': 4, 'championId': 84, 'profileIconId': 3154, 'summonerName': 'amicusp', 'bot': False, 'summonerId': 'HHAzFeb4SBs74aK4o-9SbtpCUTXbcVfsWwdscGE3X36sAkw', 'gameCustomizationObjects': [], 'perks': {'perkIds': [8010, 8009, 9105, 8299, 8139, 8135, 5008, 5008, 5003], 'perkStyle': 8000, 'perkSubStyle': 8100}}, 
+{'teamId': 100, 'spell1Id': 11, 'spell2Id': 4, 'championId': 2, 'profileIconId': 1388, 'summonerName': 'Wrigger', 'bot': False, 'summonerId': 'wbjrW-XpVnpnGclNonx1cr9J9Uk4_dw9MHIN6PKsUnWn4hg', 'gameCustomizationObjects': [], 'perks': {'perkIds': [8010, 9111, 9104, 8299, 8275, 8232, 5008, 5008, 5002], 'perkStyle': 8000, 'perkSubStyle': 8200}}, 
+{'teamId': 100, 'spell1Id': 14, 'spell2Id': 4, 'championId': 236, 'profileIconId': 4666, 'summonerName': 'DankiestMagician', 'bot': False, 'summonerId': 'gH2lp7REWBy7oAT-jYPddiP-gcZD2drC8RubaXvKMilrC1g', 'gameCustomizationObjects': [], 'perks': {'perkIds': [8005, 9111, 9103, 8014, 8304, 8345, 5005, 5008, 5002], 'perkStyle': 8000, 'perkSubStyle': 8300}}, 
+{'teamId': 100, 'spell1Id': 14, 'spell2Id': 4, 'championId': 80, 'profileIconId': 1438, 'summonerName': 'GrimorrowyDziad', 'bot': False, 'summonerId': 'mMNN_zNxmc-84PQdQIcbuTD0ZqHPK6MxeVN4G1X-2dbtLs0', 'gameCustomizationObjects': [], 'perks': {'perkIds': [8005, 8009, 9105, 8014, 8136, 8105, 5008, 5008, 5002], 'perkStyle': 8000, 'perkSubStyle': 8100}}, 
+{'teamId': 100, 'spell1Id': 4, 'spell2Id': 7, 'championId': 360, 'profileIconId': 4495, 'summonerName': 'MaxxWarrior v2', 'bot': False, 'summonerId': '40a3jM852qa4DGtdV4-uP6KhAjzb167Aq5uzNkg2EEzzBIPB', 'gameCustomizationObjects': [], 'perks': {'perkIds': [8010, 8009, 9103, 8014, 8139, 8135, 5005, 5008, 5002], 'perkStyle': 8000, 'perkSubStyle': 8100}}, 
+{'teamId': 200, 'spell1Id': 11, 'spell2Id': 4, 'championId': 76, 'profileIconId': 3785, 'summonerName': 'WOO WEDNESDAY', 'bot': False, 'summonerId': 'sa9-QvxrGhxDYEL7qS-vT-RGAno4v-kpzkfKNFLc3tMVI6du', 'gameCustomizationObjects': [], 'perks': {'perkIds': [8128, 8143, 8138, 8135, 8304, 8347, 5005, 5008, 5002], 'perkStyle': 8100, 'perkSubStyle': 8300}}, 
+{'teamId': 200, 'spell1Id': 12, 'spell2Id': 4, 'championId': 54, 'profileIconId': 581, 'summonerName': 'Wesslaren', 'bot': False, 'summonerId': 'oVNb0j106qUrhsEdpQ3vzgU3Bl7Nq-dVMxE6ZqOAcV2743o', 'gameCustomizationObjects': [], 'perks': {'perkIds': [8229, 8226, 8210, 8237, 8352, 8345, 5008, 5008, 5002], 'perkStyle': 8200, 'perkSubStyle': 8300}}, 
+{'teamId': 200, 'spell1Id': 14, 'spell2Id': 4, 'championId': 238, 'profileIconId': 3326, 'summonerName': 'svaeuge', 'bot': False, 'summonerId': 's0IR7JwYA149pREE6hJfXGzP1wadwL2gu9L5caVQGE56T40', 'gameCustomizationObjects': [], 'perks': {'perkIds': [8112, 8139, 8136, 8106, 8210, 8237, 5008, 5008, 5002], 'perkStyle': 8100, 'perkSubStyle': 8200}}, 
+{'teamId': 200, 'spell1Id': 7, 'spell2Id': 4, 'championId': 412, 'profileIconId': 4654, 'summonerName': 'eLS l Sly l', 'bot': False, 'summonerId': 'P6czJ__glW1pmXNPmTMEafK0yc7MoFiY91QRnzDt4SBFyOE', 'gameCustomizationObjects': [], 'perks': {'perkIds': [8439, 8446, 8473, 8242, 8306, 8347, 5005, 5002, 5002], 'perkStyle': 8400, 'perkSubStyle': 8300}}, 
+{'teamId': 200, 'spell1Id': 3, 'spell2Id': 4, 'championId': 202, 'profileIconId': 4086, 'summonerName': 'Onetwenty', 'bot': False, 'summonerId': 'cjwV_q9gQkh_JnQd5hdJcIuwpUrsJZcSpFFEpGZpzat4IvU', 'gameCustomizationObjects': [], 'perks': {'perkIds': [8021, 8009, 9103, 8014, 8234, 8275, 5008, 5008, 5002], 'perkStyle': 8000, 'perkSubStyle': 8200}}
+], 
+'observers': {'encryptionKey': 'FLQLzXJbbxmeeO/6BsVWPi/bnF0eeu6i'}, 
+'platformId': 'EUW1', 
+'bannedChampions': 
+[
+{'championId': 7, 'teamId': 100, 'pickTurn': 1}, 
+{'championId': 25, 'teamId': 100, 'pickTurn': 2}, 
+{'championId': 98, 'teamId': 100, 'pickTurn': 3}, 
+{'championId': 120, 'teamId': 100, 'pickTurn': 4}, 
+{'championId': 28, 'teamId': 100, 'pickTurn': 5}, 
+{'championId': 104, 'teamId': 200, 'pickTurn': 6}, 
+{'championId': 245, 'teamId': 200, 'pickTurn': 7}, 
+{'championId': 120, 'teamId': 200, 'pickTurn': 8}, 
+{'championId': 28, 'teamId': 200, 'pickTurn': 9}, 
+{'championId': 51, 'teamId': 200, 'pickTurn': 10}], 
+'gameStartTime': 1600889444481, 
+'gameLength': -45}

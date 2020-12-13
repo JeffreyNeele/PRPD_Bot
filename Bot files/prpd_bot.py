@@ -14,6 +14,7 @@
 #--------------------------------------------------------------------------------------------------#
 
 import os
+import json
 import random
 
 import discord
@@ -25,7 +26,8 @@ from riotAPI import RiotObj
 #Load variables from .env file
 load_dotenv()
 
-#Get token from .env file. Token is from the bot (see Discord develop)
+#Get token and key_api from .env file.
+#Token is from the bot (see Discord develop), key_api is from riotAPI
 TOKEN = os.getenv('DISCORD_TOKEN')
 key_API = os.getenv('RIOT_KEY')
 
@@ -41,9 +43,10 @@ client.remove_command('help')
 riot_API = RiotObj(keyAPI=key_API)
 
 #Variables for bot commands
-championTileImagePath = 'dragontail-10.19.1/10.19.1/img/champion/'
-profileiconPath = "dragontail-10.19.1/10.19.1/img/profileicon/"
-mapIconPath = "dragontail-10.19.1/10.19.1/img/map/"
+championInformationPath = Path('dragontail-10.20.1/10.20.1/data/en_GB/champion/')
+championTileImagePath = Path('dragontail-10.20.1/10.20.1/img/champion/')
+profileiconPath = Path('dragontail-10.20.1/10.20.1/img/profileicon/')
+mapIconPath = Path('dragontail-10.20.1/10.20.1/img/map/')
 whitespace = '\u200b'
 
 
@@ -120,207 +123,7 @@ async def help(ctx):
 
     await ctx.send(embed=embedHelp)
 
-@client.command()
-async def lolStatus(ctx):
-    status = riot_API.getLolStatus()
-
-    #Initialize embed, which makes a nice looking window
-    embedStatus = discord.Embed(
-        title = 'Status LoL services',
-        colour = discord.Colour.blue()
-    )
-
-    for services in status:
-        nameField = services['name']
-        serviceStatus = services['status']
-        embedStatus.add_field(name=nameField, value=serviceStatus, inline=False)
-
-    await ctx.send(embed=embedStatus)
-
-@client.command()
-async def lolSummoner(ctx, *args):
-
-    target = args[0]
-    for i in range(1,len(args),1):
-        target += ' ' + args[i]
-
-    #Retrieve information of summoner
-    try:
-        summoner = riot_API.getSummoner(target)
-    except:
-        await ctx.send('Summoner name does not exist. Please try another name')
-    else:
-        name = summoner['name']
-
-        #Make embed to showcase summoner
-        embedSummoner = discord.Embed(
-            title = name,
-            colour = discord.Colour.red()
-        )
-
-        #Add summoner level to the embed
-        embedSummoner.add_field(name='Summoner Level', value=str(summoner['summonerLevel']), inline=True)
-
-        #Add champion mastery level
-        masteryLevel = riot_API.getTotalChampionMastery(summoner['id'])
-        embedSummoner.add_field(name='Champion mastery', value=masteryLevel, inline=True)
-
-        outputRank = 'Unranked'
-        rankInfo = riot_API.getSummonerRankInfo(summoner['id'])
-
-        #Add summoner rank - only obtain the rank for 'RANKED_SOLO_5x5'
-        for rankInformation in rankInfo:
-            if rankInformation['queueType'] == 'RANKED_SOLO_5x5':
-                rankTier = rankInformation['tier']
-                rankDivision = rankInformation['rank']
-                rankPoints = rankInformation['leaguePoints']
-                outputRank = rankTier + ' ' + rankDivision + '\n' + str(rankPoints) + ' LP'
-        
-        embedSummoner.add_field(name='Rank solo', value=outputRank, inline=True)
-
-
-        #Add if summoner is in-game right now
-        try:
-            liveMatchInfo = riot_API.getLiveMatch(summoner['id'])
-        except:
-            embedSummoner.add_field(name='In-game', value='No', inline=True)
-        else:
-            mode = liveMatchInfo['gameMode']
-            mapID = liveMatchInfo['mapId']
-            gameMap = riot_API.getMap(mapID)
-            gameType = liveMatchInfo['gameType']
-            embedSummoner.add_field(name='In-game', value='Yes\n' + mode + ' - ' + gameMap + '\n' + gameType, inline=False)       
-
-        #Add profile image to the embed
-        nameOfFile = str(summoner['profileIconId']) + ".png"
-        path = Path(profileiconPath) / nameOfFile
-
-        file = discord.File(path, filename=nameOfFile)
-        embedSummoner.set_thumbnail(url='attachment://' + nameOfFile)
-
-        await ctx.send(file=file, embed=embedSummoner)
-
-# neverGiveUp: Command to remind people to not give up
-@client.command()
-async def neverGiveUp(ctx):
-    output = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-    await ctx.send(output)
-
-# noPlay: Command which tells someone to not play something
-@client.command()
-async def noPlay(ctx, target, *args):
-
-    notPlay = args[0]
-
-    for i in range(1,len(args),1):
-        notPlay += ' ' + args[i]
-
-    output = target + ' stop playing ' + notPlay + ', it\'s not going to happen'
-    
-    await ctx.send(output)
- 
-# selectRoles A B C D E: Command which randomly gives League of Legends roles to the users (max 5)
-# selectRoles:           Default command
-@client.command()
-async def selectRoles(ctx, *args):
-
-    roles = ['Top', 'Jungle', 'Mid', 'Bot', 'Support']
-    players = []
-    if not args:
-        players = ['Jason', 'Jeffrey', 'Jelmer', 'Michiel', 'Victor']
-        random.shuffle(players)
-    elif len(args) > 5:
-        await ctx.send('input contains too many players, max 5')
-        return
-    else:
-        for words in args:
-            players.append(words)
-        random.shuffle(roles)
-
-    output = players[0] + " : " + roles[0]
-
-    for i in range(1,len(players),1):
-        output += "\n" + players[i] + " : " + roles[i]
-
-    await ctx.send(output)
-
-# sendHugs: Command to send a hug to someone
-@client.command()
-async def sendHugs(ctx, *args):
-    
-    #Retrieve author
-    author = ctx.message.author.mention
-
-    #Print output in the proper format
-    target = args[0]
-    for i in range(1,len(args),1):
-        target += ' ' + args[i]
-
-    #Case 1: only bot is mentioned
-    #Case 2: when bot + other is mentioned or only others
-    #NOTE: when in server/guild, let bot role not have same name as bot self as the target will then change from user to role
-    if client.user.mentioned_in(ctx.message) and len(ctx.message.mentions) == 1:
-        output = 'Thank you ' + author + ' :sparkling_heart:'
-    else:
-        output = author + ' gives warm hugs to ' + target
-
-    await ctx.send(output)
-
-@client.command()
-async def shouldMe(ctx, *args):
-
-    chance = random.randint(0, 100)
-    output = ''
-
-    if chance <= 49:
-        output = 'You should not do '
-    else:
-        output = 'It is save to do '
-    
-    target = args[0]
-    for i in range(1,len(args),1):
-        target += ' ' + args[i]
-    
-    await ctx.send(output + target)
-
-@client.command()
-async def shouldOther(ctx, user, *args):
-
-    chance = random.randint(0, 100)
-    output = ''
-
-    if chance <= 49:
-        output = user + ' should not do '
-    else:
-        output = 'It is save for ' + user + ' to do '
-    
-    target = args[0]
-    for i in range(1,len(args),1):
-        target += ' ' + args[i]
-    
-    await ctx.send(output + target)
-
-
-
-#SECTION FOR TODO CODE!
-#--------------------------------------------------------------------------------------------------#
-
-#Command to test new commands before making it an official command
-@client.command()
-async def comTest(ctx):
-    
-    allSummonerSpells = riot_API.getSummonerSpells()
-    print(allSummonerSpells)
-
-#TODO: Command which shows basic information of a summoner in a match
-@client.command()
-async def championInfo(ctx, *args):
-    
-    target = args[0]
-    for i in range(1,len(args),1):
-        target += ' ' + args[i]
-
-#TODO: Command which shows basic information of a summoner in a match
+#Command which shows basic information of a summoner in a match
 @client.command()
 async def liveMatch(ctx, *args):
 
@@ -441,7 +244,7 @@ async def liveMatch(ctx, *args):
             
             #Add profile image to the embed
             nameOfFile = 'map' + str(liveMatchInfo['mapId']) + ".png"
-            path = Path(mapIconPath) / nameOfFile
+            path = mapIconPath / nameOfFile
 
             #Add match mode
             mode = liveMatchInfo['gameMode']
@@ -501,13 +304,224 @@ async def liveMatch(ctx, *args):
 
             #Add current champion picture
             championURL = allChampions[targetChampion]['image']['full']            
-            path = Path(championTileImagePath) / championURL
+            path = championTileImagePath / championURL
 
             championFile = discord.File(path, filename=championURL)
             files.append(championFile)
             embedMatch.set_author(name=target + ' Match', icon_url='attachment://' + championURL)
             
             await ctx.send(files=files, embed=embedMatch)
+
+@client.command()
+async def lolStatus(ctx):
+    status = riot_API.getLolStatus()
+
+    #Initialize embed, which makes a nice looking window
+    embedStatus = discord.Embed(
+        title = 'Status LoL services',
+        colour = discord.Colour.blue()
+    )
+
+    for services in status:
+        nameField = services['name']
+        serviceStatus = services['status']
+        embedStatus.add_field(name=nameField, value=serviceStatus, inline=False)
+
+    await ctx.send(embed=embedStatus)
+
+@client.command()
+async def lolSummoner(ctx, *args):
+
+    target = args[0]
+    for i in range(1,len(args),1):
+        target += ' ' + args[i]
+
+    #Retrieve information of summoner
+    try:
+        summoner = riot_API.getSummoner(target)
+    except:
+        await ctx.send('Summoner name does not exist. Please try another name')
+    else:
+        name = summoner['name']
+
+        #Make embed to showcase summoner
+        embedSummoner = discord.Embed(
+            title = name,
+            colour = discord.Colour.red()
+        )
+
+        #Add summoner level to the embed
+        embedSummoner.add_field(name='Summoner Level', value=str(summoner['summonerLevel']), inline=True)
+
+        #Add champion mastery level
+        masteryLevel = riot_API.getTotalChampionMastery(summoner['id'])
+        embedSummoner.add_field(name='Champion mastery', value=masteryLevel, inline=True)
+
+        outputRank = 'Unranked'
+        rankInfo = riot_API.getSummonerRankInfo(summoner['id'])
+
+        #Add summoner rank - only obtain the rank for 'RANKED_SOLO_5x5'
+        for rankInformation in rankInfo:
+            if rankInformation['queueType'] == 'RANKED_SOLO_5x5':
+                rankTier = rankInformation['tier']
+                rankDivision = rankInformation['rank']
+                rankPoints = rankInformation['leaguePoints']
+                outputRank = rankTier + ' ' + rankDivision + '\n' + str(rankPoints) + ' LP'
+        
+        embedSummoner.add_field(name='Rank solo', value=outputRank, inline=True)
+
+
+        #Add if summoner is in-game right now
+        try:
+            liveMatchInfo = riot_API.getLiveMatch(summoner['id'])
+        except:
+            embedSummoner.add_field(name='In-game', value='No', inline=True)
+        else:
+            mode = liveMatchInfo['gameMode']
+            mapID = liveMatchInfo['mapId']
+            gameMap = riot_API.getMap(mapID)
+            gameType = liveMatchInfo['gameType']
+            embedSummoner.add_field(name='In-game', value='Yes\n' + mode + ' - ' + gameMap + '\n' + gameType, inline=False)       
+
+        #Add profile image to the embed
+        nameOfFile = str(summoner['profileIconId']) + ".png"
+        path = profileiconPath / nameOfFile
+
+        file = discord.File(path, filename=nameOfFile)
+        embedSummoner.set_thumbnail(url='attachment://' + nameOfFile)
+
+        await ctx.send(file=file, embed=embedSummoner)
+
+# neverGiveUp: Command to remind people to not give up
+@client.command()
+async def neverGiveUp(ctx):
+    output = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    await ctx.send(output)
+
+# noPlay: Command which tells someone to not play something
+@client.command()
+async def noPlay(ctx, target, *args):
+
+    notPlay = args[0]
+
+    for i in range(1,len(args),1):
+        notPlay += ' ' + args[i]
+
+    output = target + ' stop playing ' + notPlay + ', it\'s not going to happen'
+    
+    await ctx.send(output)
+ 
+# selectRoles A B C D E: Command which randomly gives League of Legends roles to the users (max 5)
+# selectRoles:           Default command
+@client.command()
+async def selectRoles(ctx, *args):
+
+    roles = ['Top', 'Jungle', 'Mid', 'Bot', 'Support']
+    players = []
+    if not args:
+        players = ['Jason', 'Jeffrey', 'Jelmer', 'Michiel', 'Victor']
+        random.shuffle(players)
+    elif len(args) > 5:
+        await ctx.send('input contains too many players, max 5')
+        return
+    else:
+        for words in args:
+            players.append(words)
+        random.shuffle(roles)
+
+    output = players[0] + " : " + roles[0]
+
+    for i in range(1,len(players),1):
+        output += "\n" + players[i] + " : " + roles[i]
+
+    await ctx.send(output)
+
+# sendHugs: Command to send a hug to someone
+@client.command()
+async def sendHugs(ctx, *args):
+    
+    #Retrieve author
+    author = ctx.message.author.mention
+
+    #Print output in the proper format
+    target = args[0]
+    for i in range(1,len(args),1):
+        target += ' ' + args[i]
+
+    #Case 1: only bot is mentioned
+    #Case 2: when bot + other is mentioned or only others
+    #NOTE: when in server/guild, let bot role not have same name as bot self as the target will then change from user to role
+    if client.user.mentioned_in(ctx.message) and len(ctx.message.mentions) == 1:
+        output = 'Thank you ' + author + ' :sparkling_heart:'
+    else:
+        output = author + ' gives warm hugs to ' + target
+
+    await ctx.send(output)
+
+@client.command()
+async def shouldMe(ctx, *args):
+
+    chance = random.randint(0, 100)
+    output = ''
+
+    if chance <= 49:
+        output = 'You should not do '
+    else:
+        output = 'It is save to do '
+    
+    target = args[0]
+    for i in range(1,len(args),1):
+        target += ' ' + args[i]
+    
+    await ctx.send(output + target)
+
+@client.command()
+async def shouldOther(ctx, user, *args):
+
+    chance = random.randint(0, 100)
+    output = ''
+
+    if chance <= 49:
+        output = user + ' should not do '
+    else:
+        output = 'It is save for ' + user + ' to do '
+    
+    target = args[0]
+    for i in range(1,len(args),1):
+        target += ' ' + args[i]
+    
+    await ctx.send(output + target)
+
+
+#SECTION FOR TODO CODE!
+#--------------------------------------------------------------------------------------------------#
+
+#Command to test new commands before making it an official command
+@client.command()
+async def comTest(ctx):
+    
+    allSummonerSpells = riot_API.getAllChampions()
+    print(allSummonerSpells['Aatrox'])
+
+#TODO: Command which shows basic information of a summoner in a match
+@client.command()
+async def champion(ctx, *args):
+    
+    #Get target name (no spaces, because it is necessary to get the json file)
+    target = args[0].capitalize()
+
+    for i in range(1,len(args),1):
+        target += args[i].capitalize()   
+
+    try:
+        path = championInformationPath / (target + '.json')
+        with open(path) as championFile:
+            data = json.load(championFile)
+            print(data)
+    except:
+        await ctx.send('Champion name does not exist. Please try again')
+    else:
+        pass
 
 #--------------------------------------------------------------------------------------------------#
 
