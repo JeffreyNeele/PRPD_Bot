@@ -3,5 +3,6 @@ PRPD_Bot is a side-project with the intent to make a bot for discord. The bot is
 - Show summoner information;
 - Show live league match information;
 - And appoint roles to players
+
 The bot is also able to react to messages containing certain words for example (this is not LoL related).
 NOTE: own riotAPI key is required.
